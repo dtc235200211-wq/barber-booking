@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Đặt Lịch Cắt Tóc Trực Tuyến</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 40px;
+        background-color: #f4f4f9;
+      }
+      .container {
+        max-width: 500px;
+        margin: 0 auto;
+        background: white;
+        padding: 25px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      h2 {
+        text-align: center;
+        color: #333;
+      }
+      .form-group {
+        margin-bottom: 15px;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+      input,
+      select,
+      button {
+        width: 100%;
+        padding: 10px;
+        box-sizing: border-box;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 14px;
+      }
+      button {
+        background-color: #28a745;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+        border: none;
+        margin-top: 10px;
+      }
+      button:hover {
+        background-color: #218838;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>XÁC NHẬN ĐẶT LỊCH CẮT TÓC</h2>
+      <form id="bookingForm">
+        <div class="form-group">
+          <label>Họ và Tên:</label>
+          <input type="text" id="name" required placeholder="Nguyễn Văn A" />
+        </div>
+        <div class="form-group">
+          <label>Số điện thoại:</label>
+          <input type="tel" id="phone" required placeholder="0912345678" />
+        </div>
+        <div class="form-group">
+          <label>Chọn dịch vụ:</label>
+          <select id="service"></select>
+        </div>
+        <div class="form-group">
+          <label>Chọn ngày:</label>
+          <input type="date" id="date" required />
+        </div>
+        <div class="form-group">
+          <label>Chọn giờ:</label>
+          <select id="time">
+            <option value="09:00">09:00 AM</option>
+            <option value="10:00">10:00 AM</option>
+            <option value="14:00">02:00 PM</option>
+            <option value="15:00">03:00 PM</option>
+            <option value="16:00">04:00 PM</option>
+          </select>
+        </div>
+        <button type="submit">GỬI YÊU CẦU ĐẶT LỊCH</button>
+      </form>
+    </div>
+
+    <script>
+      // Link này tạm thời gọi dưới Local, sau này deploy Render sẽ đổi thành link Cloud
+      const API_URL = "http://localhost:5000/api";
+
+      // 1. Tải danh sách dịch vụ từ Server
+      async function loadServices() {
+        try {
+          const res = await fetch(`${API_URL}/services`);
+          const data = await res.json();
+          const select = document.getElementById("service");
+          select.innerHTML = "";
+          data.forEach((s) => {
+            select.innerHTML += `<option value="${s.id}">${s.name} - ${s.price.toLocaleString()} VNĐ</option>`;
+          });
+        } catch (err) {
+          console.error("Chưa kết nối được Backend:", err);
+        }
+      }
+      loadServices();
+
+      // 2. Gửi yêu cầu Đặt lịch
+      document
+        .getElementById("bookingForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const payload = {
+            customer_name: document.getElementById("name").value,
+            phone: document.getElementById("phone").value,
+            service_id: document.getElementById("service").value,
+            booking_date: document.getElementById("date").value,
+            booking_time: document.getElementById("time").value,
+          };
+
+          try {
+            const res = await fetch(`${API_URL}/appointments`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload),
+            });
+
+            const result = await res.json();
+            alert(result.message || result.error);
+          } catch (err) {
+            alert("Lỗi kết nối Server!");
+          }
+        });
+    </script>
+  </body>
+</html>
