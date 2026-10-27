@@ -2,53 +2,62 @@
 <html lang="vi">
   <head>
     <meta charset="UTF-8" />
-    <title>Đặt Lịch Cắt Tóc Trực Tuyến</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Đặt Lịch Cắt Tóc</title>
     <style>
       body {
         font-family: Arial, sans-serif;
-        margin: 40px;
-        background-color: #f4f4f9;
+        background-color: #f4f6f9;
+        display: flex;
+        justify-content: center;
+        padding-top: 50px;
+        margin: 0;
       }
       .container {
-        max-width: 500px;
-        margin: 0 auto;
-        background: white;
-        padding: 25px;
-        border-radius: 8px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        background: #fff;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 450px;
       }
       h2 {
         text-align: center;
         color: #333;
+        margin-bottom: 20px;
       }
       .form-group {
         margin-bottom: 15px;
       }
       label {
         display: block;
-        margin-bottom: 5px;
         font-weight: bold;
+        margin-bottom: 5px;
+        color: #333;
       }
       input,
-      select,
-      button {
+      select {
         width: 100%;
         padding: 10px;
-        box-sizing: border-box;
         border: 1px solid #ccc;
-        border-radius: 4px;
+        border-radius: 5px;
+        box-sizing: border-box;
         font-size: 14px;
       }
       button {
-        background-color: #28a745;
+        width: 100%;
+        padding: 12px;
+        background-color: #1e7e34;
         color: white;
-        font-weight: bold;
-        cursor: pointer;
         border: none;
+        border-radius: 5px;
+        font-weight: bold;
+        font-size: 16px;
+        cursor: pointer;
         margin-top: 10px;
       }
       button:hover {
-        background-color: #218838;
+        background-color: #155724;
       }
     </style>
   </head>
@@ -57,64 +66,98 @@
       <h2>XÁC NHẬN ĐẶT LỊCH CẮT TÓC</h2>
       <form id="bookingForm">
         <div class="form-group">
-          <label>Họ và Tên:</label>
-          <input type="text" id="name" required placeholder="Nguyễn Văn A" />
+          <label for="name">Họ và Tên:</label>
+          <input type="text" id="name" required placeholder="Nhập họ tên..." />
         </div>
+
         <div class="form-group">
-          <label>Số điện thoại:</label>
-          <input type="tel" id="phone" required placeholder="0912345678" />
+          <label for="phone">Số điện thoại:</label>
+          <input
+            type="text"
+            id="phone"
+            required
+            placeholder="Nhập số điện thoại..."
+          />
         </div>
+
         <div class="form-group">
-          <label>Chọn dịch vụ:</label>
-          <select id="service"></select>
-        </div>
-        <div class="form-group">
-          <label>Chọn ngày:</label>
-          <input type="date" id="date" required />
-        </div>
-        <div class="form-group">
-          <label>Chọn giờ:</label>
-          <select id="time">
-            <option value="09:00">09:00 AM</option>
-            <option value="10:00">10:00 AM</option>
-            <option value="14:00">02:00 PM</option>
-            <option value="15:00">03:00 PM</option>
-            <option value="16:00">04:00 PM</option>
+          <label for="service">Chọn dịch vụ:</label>
+          <select id="service" required>
+            <option value="">-- Đang tải dịch vụ... --</option>
           </select>
         </div>
+
+        <div class="form-group">
+          <label for="date">Chọn ngày:</label>
+          <input type="date" id="date" required />
+        </div>
+
+        <div class="form-group">
+          <label for="time">Chọn giờ:</label>
+          <select id="time" required>
+            <option value="09:00 AM">09:00 AM</option>
+            <option value="10:00 AM">10:00 AM</option>
+            <option value="11:00 AM">11:00 AM</option>
+            <option value="02:00 PM">02:00 PM</option>
+            <option value="03:00 PM">03:00 PM</option>
+            <option value="04:00 PM">04:00 PM</option>
+            <option value="05:00 PM">05:00 PM</option>
+          </select>
+        </div>
+
         <button type="submit">GỬI YÊU CẦU ĐẶT LỊCH</button>
       </form>
     </div>
 
     <script>
-      // Link này tạm thời gọi dưới Local, sau này deploy Render sẽ đổi thành link Cloud
-      const API_URL = "http://localhost:5000/api";
+      const API_URL = "https://barber-booking-8021.onrender.com/api";
 
-      // 1. Tải danh sách dịch vụ từ Server
+      // 1. Tự động lấy danh sách dịch vụ từ Backend khi mở trang
       async function loadServices() {
         try {
           const res = await fetch(`${API_URL}/services`);
           const data = await res.json();
           const select = document.getElementById("service");
-          select.innerHTML = "";
-          data.forEach((s) => {
-            select.innerHTML += `<option value="${s.id}">${s.name} - ${s.price.toLocaleString()} VNĐ</option>`;
-          });
+
+          select.innerHTML = '<option value="">-- Chọn dịch vụ --</option>';
+
+          if (Array.isArray(data) && data.length > 0) {
+            data.forEach((s) => {
+              select.innerHTML += `<option value="${s.id}">${s.name} - ${s.price}đ</option>`;
+            });
+          } else {
+            select.innerHTML =
+              '<option value="">-- Không có dịch vụ --</option>';
+          }
         } catch (err) {
-          console.error("Chưa kết nối được Backend:", err);
+          console.error("Chưa kết nối được Server:", err);
+          alert(
+            "Lỗi: Hãy chắc chắn bạn đã chạy lệnh 'node server.js' ở Terminal!",
+          );
         }
       }
-      loadServices();
 
-      // 2. Gửi yêu cầu Đặt lịch
+      // Tự động gọi hàm nạp dịch vụ ngay khi trang web mở
+      window.addEventListener("DOMContentLoaded", loadServices);
+
+      // 2. Xử lý khi nhấn nút Đặt lịch
       document
         .getElementById("bookingForm")
         .addEventListener("submit", async (e) => {
           e.preventDefault();
+
+          const serviceSelect = document.getElementById("service");
+          const serviceId = serviceSelect.value;
+
+          if (!serviceId) {
+            alert("Vui lòng chọn một dịch vụ trong danh sách!");
+            return;
+          }
+
           const payload = {
             customer_name: document.getElementById("name").value,
             phone: document.getElementById("phone").value,
-            service_id: document.getElementById("service").value,
+            service_id: parseInt(serviceId, 10),
             booking_date: document.getElementById("date").value,
             booking_time: document.getElementById("time").value,
           };
@@ -127,9 +170,16 @@
             });
 
             const result = await res.json();
-            alert(result.message || result.error);
+
+            if (res.ok) {
+              alert(result.message || "Đặt lịch thành công!");
+              document.getElementById("bookingForm").reset();
+              loadServices(); // Nạp lại danh sách
+            } else {
+              alert(result.error || result.message || "Không thể đặt lịch!");
+            }
           } catch (err) {
-            alert("Lỗi kết nối Server!");
+            alert("Không thể kết nối đến Server!");
           }
         });
     </script>

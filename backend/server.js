@@ -42,11 +42,9 @@ app.post("/api/appointments", async (req, res) => {
       [booking_date, booking_time, "Cancelled"],
     );
     if (check.rows.length > 0) {
-      return res
-        .status(400)
-        .json({
-          message: "Khung giờ này đã có người đặt! Vui lòng chọn giờ khác.",
-        });
+      return res.status(400).json({
+        message: "Khung giờ này đã có người đặt! Vui lòng chọn giờ khác.",
+      });
     }
 
     const newBooking = await pool.query(
@@ -62,4 +60,19 @@ app.post("/api/appointments", async (req, res) => {
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server đang chạy thành công tại cổng http://localhost:${PORT}`);
+});
+// API 3: Lấy danh sách tất cả lịch hẹn cho Admin
+app.get("/api/admin/appointments", async (req, res) => {
+  try {
+    const queryText = `
+            SELECT a.id, a.customer_name, a.phone, s.name as service_name, s.price, a.booking_date, a.booking_time, a.status 
+            FROM appointments a
+            JOIN services s ON a.service_id = s.id
+            ORDER BY a.booking_date DESC, a.booking_time ASC
+        `;
+    const result = await pool.query(queryText);
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });

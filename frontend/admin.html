@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quản Lý Đặt Lịch - Admin</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: #f4f6f9;
+        padding: 20px;
+      }
+      .container {
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        max-width: 900px;
+        margin: 0 auto;
+      }
+      h2 {
+        color: #333;
+        text-align: center;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 10px;
+        text-align: left;
+      }
+      th {
+        background-color: #1e7e34;
+        color: white;
+      }
+      tr:nth-child(even) {
+        background-color: #f9f9f9;
+      }
+      .refresh-btn {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+        float: right;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <button class="refresh-btn" onclick="fetchAppointments()">
+        🔄 Tải lại danh sách
+      </button>
+      <h2>DANH SÁCH LỊCH HẸN KHÁCH HÀNG</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>STT</th>
+            <th>Tên Khách</th>
+            <th>Số Điện Thoại</th>
+            <th>Dịch Vụ</th>
+            <th>Giá</th>
+            <th>Ngày Đặt</th>
+            <th>Giờ Đặt</th>
+          </tr>
+        </thead>
+        <tbody id="appointmentList">
+          <tr>
+            <td colspan="7" style="text-align: center">Đang tải dữ liệu...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <script>
+      const API_URL = "https://barber-backend-api.onrender.com/api";
+
+      async function fetchAppointments() {
+        try {
+          const res = await fetch(`${API_URL}/admin/appointments`);
+          const data = await res.json();
+          const tbody = document.getElementById("appointmentList");
+          tbody.innerHTML = "";
+
+          if (data.length === 0) {
+            tbody.innerHTML =
+              '<tr><td colspan="7" style="text-align:center;">Chưa có lịch hẹn nào.</td></tr>';
+            return;
+          }
+
+          data.forEach((item, index) => {
+            tbody.innerHTML += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td><b>${item.customer_name}</b></td>
+                            <td>${item.phone}</td>
+                            <td>${item.service_name}</td>
+                            <td>${item.price}k</td>
+                            <td>${item.booking_date}</td>
+                            <td>${item.booking_time}</td>
+                        </tr>
+                    `;
+          });
+        } catch (err) {
+          console.error("Lỗi:", err);
+        }
+      }
+
+      window.onload = fetchAppointments;
+    </script>
+  </body>
+</html>
